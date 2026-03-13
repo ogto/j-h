@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>신정훈님의 CKPool 대시보드</title>
+  <style>
+    :root{
+      --bg1:#f7f8fc;
+      --bg2:#eef3ff;
+      --card:#ffffffcc;
+      --line:#e6eaf5;
+      --text:#182033;
+      --sub:#65708a;
+      --blue:#5b7cff;
+      --blue-soft:#e8eeff;
+      --mint:#18c29c;
+      --mint-soft:#e8fbf6;
+      --gold:#f4b740;
+      --gold-soft:#fff6df;
+      --pink:#ff7aa2;
+      --shadow:0 20px 50px rgba(73,97,168,.12);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Segoe UI",sans-serif;color:var(--text);}
+    body{
+      background:
+        radial-gradient(circle at top left, #ffffff 0%, #f8fbff 35%, transparent 50%),
+        linear-gradient(180deg,var(--bg2),var(--bg1));
+      min-height:100vh;
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 60px;}
+    .hero{
+      display:flex;gap:20px;align-items:center;justify-content:space-between;
+      padding:26px 28px;background:linear-gradient(135deg,#ffffffd8,#f3f6ffea);
+      border:1px solid rgba(255,255,255,.8);border-radius:30px;box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+      margin-bottom:20px;
+    }
+    .hero-left{display:flex;gap:16px;align-items:center;min-width:0}
+    .badge{
+      width:72px;height:72px;border-radius:22px;
+      display:grid;place-items:center;font-size:34px;
+      background:linear-gradient(135deg,#7ea4ff,#8be0ff);color:white;
+      box-shadow:0 12px 28px rgba(91,124,255,.28);
+      flex:0 0 auto;
+    }
+    h1{margin:0;font-size:30px;line-height:1.15}
+    .sub{margin-top:8px;color:var(--sub);font-size:14px;word-break:break-all}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    button,.ghost-btn{
+      border:0;border-radius:16px;padding:13px 18px;font-weight:700;font-size:14px;cursor:pointer;
+      transition:.2s transform,.2s box-shadow,.2s opacity;
+    }
+    button:hover,.ghost-btn:hover{transform:translateY(-1px)}
+    .primary{
+      color:#fff;background:linear-gradient(135deg,#5b7cff,#7e91ff);box-shadow:0 10px 24px rgba(91,124,255,.25);
+    }
+    .secondary{
+      color:var(--text);background:#fff;border:1px solid var(--line);
+    }
+    .grid{display:grid;grid-template-columns:1.25fr .95fr;gap:20px}
+    .card{
+      background:var(--card);border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);
+      box-shadow:var(--shadow);backdrop-filter:blur(10px);overflow:hidden;
+    }
+    .card-head{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 22px 0 22px;
+    }
+    .card-title{font-size:18px;font-weight:800}
+    .card-body{padding:18px 22px 22px}
+    .muted{color:var(--sub)}
+    .stats{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;
+    }
+    .stat{
+      background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;
+      min-height:114px;
+    }
+    .stat .label{font-size:13px;color:var(--sub);margin-bottom:8px}
+    .stat .value{font-size:28px;font-weight:800;letter-spacing:-.03em}
+    .stat .small{font-size:12px;color:var(--sub);margin-top:7px}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{
+      padding:9px 12px;border-radius:999px;font-size:12px;font-weight:700;
+      display:inline-flex;gap:8px;align-items:center;
+    }
+    .chip.blue{background:var(--blue-soft);color:#4b67d6}
+    .chip.mint{background:var(--mint-soft);color:#119375}
+    .chip.gold{background:var(--gold-soft);color:#bc8321}
+    .chip.pink{background:#ffe7ef;color:#cf4f76}
+    .kv{
+      display:grid;grid-template-columns:120px 1fr;gap:12px 16px;font-size:14px;
+      align-items:center;
+    }
+    .kv div{padding:8px 0;border-bottom:1px dashed var(--line)}
+    .bar-group{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+    .bar-item{display:grid;grid-template-columns:58px 1fr auto;gap:12px;align-items:center}
+    .bar-track{height:12px;background:#edf2fb;border-radius:999px;overflow:hidden}
+    .bar-fill{
+      height:100%;border-radius:999px;
+      background:linear-gradient(90deg,#7fb0ff,#5b7cff);
+      min-width:10px;
+    }
+    .bar-item .name{font-size:13px;font-weight:700;color:var(--sub)}
+    .bar-item .num{font-size:13px;font-weight:800}
+    .workers-table{width:100%;border-collapse:collapse;font-size:14px}
+    .workers-table th,.workers-table td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    .workers-table th{color:var(--sub);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+    .workers-table tr:last-child td{border-bottom:0}
+    .worker-pill{
+      display:inline-block;padding:6px 10px;border-radius:999px;background:#f3f6ff;color:#5069d9;font-size:12px;font-weight:700
+    }
+    textarea{
+      width:100%;min-height:140px;border:1px solid var(--line);background:#fff;border-radius:18px;
+      padding:14px;font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;
+      color:var(--text);
+    }
+    .note{
+      background:#fff8e7;border:1px solid #f8e1a6;color:#8a6a19;
+      border-radius:18px;padding:14px 16px;font-size:13px;line-height:1.5;
+    }
+    .footer{margin-top:18px;color:var(--sub);font-size:12px;text-align:center}
+    .hidden{display:none !important}
+    .empty{
+      padding:24px;border:1px dashed var(--line);border-radius:18px;background:#fff;text-align:center;color:var(--sub)
+    }
+    .status{
+      padding:14px 16px;border-radius:18px;font-size:13px;font-weight:700;background:#eff6ff;color:#3559cc;
+      border:1px solid #dbe6ff;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .hero{flex-direction:column;align-items:flex-start}
+      .actions{justify-content:flex-start}
+    }
+    @media (max-width: 640px){
+      h1{font-size:24px}
+      .stats{grid-template-columns:1fr}
+      .hero{padding:20px}
+      .card-head,.card-body{padding-left:16px;padding-right:16px}
+      .kv{grid-template-columns:90px 1fr}
+      .bar-item{grid-template-columns:50px 1fr auto}
+      .workers-table{font-size:13px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-left">
+        <div class="badge">⛏️</div>
+        <div>
+          <h1>신정훈님의 CKPool 데이터</h1>
+          <div class="sub" id="addressText">주소 불러오는 중...</div>
+          <div class="chips">
+            <span class="chip blue">실시간 API 기반</span>
+            <span class="chip mint">귀엽고 깔끔한 대시보드</span>
+            <span class="chip gold">worker / share / hashrate 요약</span>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="refreshBtn">지금 새로고침</button>
+        <button class="secondary" id="toggleManualBtn">수동 JSON 입력</button>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <div class="card-title">핵심 지표</div>
+          <div class="muted" id="updatedAt">업데이트 대기 중</div>
+        </div>
+        <div class="card-body">
+          <div id="statusBox" class="status">API에서 데이터를 불러오는 중입니다.</div>
+
+          <div class="stats" id="statsGrid">
+            <div class="stat">
+              <div class="label">최근 1분 해시레이트</div>
+              <div class="value" id="hashrate1m">-</div>
+              <div class="small">지금 가장 즉각적인 상태</div>
+            </div>
+            <div class="stat">
+              <div class="label">최근 1시간 해시레이트</div>
+              <div class="value" id="hashrate1hr">-</div>
+              <div class="small">조금 더 안정적인 평균</div>
+            </div>
+            <div class="stat">
+              <div class="label">총 shares</div>
+              <div class="value" id="shares">-</div>
+              <div class="small">누적 제출 share</div>
+            </div>
+            <div class="stat">
+              <div class="label">활성 workers</div>
+              <div class="value" id="workers">-</div>
+              <div class="small">현재 연결된 장치 수</div>
+            </div>
+          </div>
+
+          <div class="chips">
+            <span class="chip blue">bestshare <strong id="bestshare">-</strong></span>
+            <span class="chip mint">bestever <strong id="bestever">-</strong></span>
+            <span class="chip pink">blocks <strong id="blocks">-</strong></span>
+          </div>
+
+          <div style="margin-top:20px" class="card-title">해시레이트 흐름</div>
+          <div class="bar-group" id="hashrateBars"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div class="card-title">상세 정보</div>
+          <div class="muted">요약 카드</div>
+        </div>
+        <div class="card-body">
+          <div class="kv">
+            <div class="muted">마지막 share</div><div id="lastshare">-</div>
+            <div class="muted">authorised</div><div id="authorised">-</div>
+            <div class="muted">worker 항목 수</div><div id="workerCount">-</div>
+            <div class="muted">API 상태</div><div id="apiState">정상</div>
+          </div>
+
+          <div style="height:16px"></div>
+
+          <div class="note">
+            이 파일은 기본적으로 <strong>CKPool 사용자 JSON API</strong>를 직접 호출해서 화면을 구성합니다.
+            브라우저 정책 때문에 외부 호출이 막히면 아래의 <strong>수동 JSON 입력</strong> 영역에 응답값을 붙여 넣으면 바로 같은 화면으로 렌더링됩니다.
+          </div>
+
+          <div id="manualBox" class="hidden" style="margin-top:16px">
+            <textarea id="manualJson" placeholder='{"hashrate1m":"3.9T","shares":123,"worker":[...]}'></textarea>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+              <button class="primary" id="applyManualBtn">수동 데이터 적용</button>
+              <button class="secondary" id="sampleBtn">샘플 데이터 넣기</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head">
+        <div class="card-title">Worker 상세</div>
+        <div class="muted">장치별 상태</div>
+      </div>
+      <div class="card-body">
+        <div id="workersWrap" class="empty">worker 데이터가 아직 없습니다.</div>
+      </div>
+    </section>
+
+    <div class="footer">
+      데이터 출처: solo.ckpool.org/users/&lt;BTC주소&gt; · 마지막 렌더링 시각은 이 파일 내부에서 표시합니다.
+    </div>
+  </div>
+
+  <script>
+    const BTC_ADDRESS = "BC1QX34GPNQTHCD89R7H40GP3J8QRJXUKH2388KLRQ";
+    const API_URL = `https://solo.ckpool.org/users/${BTC_ADDRESS}`;
+
+    const el = (id) => document.getElementById(id);
+
+    function formatNumber(value){
+      if (value === null || value === undefined || value === "") return "-";
+      const n = Number(value);
+      if (Number.isNaN(n)) return String(value);
+      return n.toLocaleString("ko-KR");
+    }
+
+    function formatMaybeNumber(value){
+      if (value === null || value === undefined || value === "") return "-";
+      const n = Number(value);
+      if (Number.isNaN(n)) return String(value);
+      if (Math.abs(n) >= 1000) return n.toLocaleString("ko-KR", {maximumFractionDigits: 2});
+      return n.toLocaleString("ko-KR", {maximumFractionDigits: 4});
+    }
+
+    function formatUnix(ts){
+      const n = Number(ts);
+      if (!n) return "-";
+      const d = new Date(n * 1000);
+      return d.toLocaleString("ko-KR");
+    }
+
+    function parseHashrateToBase(value){
+      if (!value || typeof value !== "string") return Number(value) || 0;
+      const m = value.trim().match(/^([\d.]+)\s*([KMGTP]?)(?:H\/s)?$/i);
+      if (!m) return Number(value) || 0;
+      const num = Number(m[1]);
+      const unit = (m[2] || "").toUpperCase();
+      const map = {"":1,"K":1e3,"M":1e6,"G":1e9,"T":1e12,"P":1e15};
+      return num * (map[unit] || 1);
+    }
+
+    function nowText(){
+      return new Date().toLocaleString("ko-KR");
+    }
+
+    function setStatus(text, kind="info"){
+      const box = el("statusBox");
+      box.textContent = text;
+      const styles = {
+        info: {bg:"#eff6ff", color:"#3559cc", border:"#dbe6ff"},
+        ok: {bg:"#eafbf3", color:"#177c60", border:"#c7f2df"},
+        warn: {bg:"#fff8e7", color:"#8a6a19", border:"#f8e1a6"},
+        err: {bg:"#fff0f3", color:"#c23f69", border:"#ffd4e1"},
+      };
+      const s = styles[kind] || styles.info;
+      box.style.background = s.bg;
+      box.style.color = s.color;
+      box.style.borderColor = s.border;
+    }
+
+    function renderHashrateBars(data){
+      const items = [
+        {label:"1m", key:"hashrate1m"},
+        {label:"5m", key:"hashrate5m"},
+        {label:"1h", key:"hashrate1hr"},
+        {label:"1d", key:"hashrate1d"},
+        {label:"7d", key:"hashrate7d"},
+      ].filter(item => data[item.key] !== undefined);
+
+      const parsed = items.map(item => ({...item, raw:data[item.key], base:parseHashrateToBase(data[item.key])}));
+      const max = Math.max(...parsed.map(i => i.base), 1);
+
+      el("hashrateBars").innerHTML = parsed.map(item => {
+        const width = Math.max((item.base / max) * 100, item.base > 0 ? 8 : 2);
+        return `
+          <div class="bar-item">
+            <div class="name">${item.label}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+            <div class="num">${item.raw ?? "-"}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderWorkers(data){
+      const workers = Array.isArray(data.worker) ? data.worker : [];
+      el("workerCount").textContent = formatNumber(workers.length);
+
+      if (!workers.length){
+        el("workersWrap").innerHTML = '<div class="empty">worker 데이터가 없습니다.</div>';
+        return;
+      }
+
+      const rows = workers.map((w, idx) => `
+        <tr>
+          <td><span class="worker-pill">${idx + 1}</span></td>
+          <td style="word-break:break-all">${w.workername || "-"}</td>
+          <td>${w.hashrate1m || "-"}</td>
+          <td>${w.hashrate1hr || "-"}</td>
+          <td>${formatNumber(w.shares)}</td>
+          <td>${formatMaybeNumber(w.bestshare)}</td>
+          <td>${formatUnix(w.lastshare)}</td>
+        </tr>
+      `).join("");
+
+      el("workersWrap").innerHTML = `
+        <div style="overflow:auto">
+          <table class="workers-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>worker</th>
+                <th>1m</th>
+                <th>1h</th>
+                <th>shares</th>
+                <th>bestshare</th>
+                <th>lastshare</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function render(data, sourceLabel){
+      el("addressText").textContent = `BTC 주소: ${BTC_ADDRESS}`;
+      el("updatedAt").textContent = `업데이트: ${nowText()}`;
+      el("hashrate1m").textContent = data.hashrate1m ?? "-";
+      el("hashrate1hr").textContent = data.hashrate1hr ?? "-";
+      el("shares").textContent = formatNumber(data.shares);
+      el("workers").textContent = formatNumber(data.workers);
+      el("bestshare").textContent = formatMaybeNumber(data.bestshare);
+      el("bestever").textContent = formatMaybeNumber(data.bestever);
+      el("blocks").textContent = formatNumber(data.blocks);
+      el("lastshare").textContent = formatUnix(data.lastshare);
+      el("authorised").textContent = formatUnix(data.authorised);
+      el("apiState").textContent = sourceLabel;
+      renderHashrateBars(data);
+      renderWorkers(data);
+      setStatus(`데이터 로드 완료 · ${sourceLabel}`, "ok");
+    }
+
+    async function loadApi(){
+      setStatus("API에서 데이터를 불러오는 중입니다.", "info");
+      try {
+        const res = await fetch(API_URL, {cache:"no-store"});
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        render(data, "실시간 API");
+      } catch (err) {
+        console.error(err);
+        setStatus("브라우저에서 API 직접 호출이 막혔습니다. 아래 수동 JSON 입력으로 바로 표시할 수 있습니다.", "warn");
+        el("apiState").textContent = "직접 호출 실패";
+      }
+    }
+
+    const sampleData = {
+      "hashrate1m": "3.92T",
+      "hashrate5m": "3.89T",
+      "hashrate1hr": "3.6T",
+      "hashrate1d": "932G",
+      "hashrate7d": "152G",
+      "lastshare": 1763352196,
+      "workers": 2,
+      "shares": 21847089,
+      "bestshare": 39863056.04777412,
+      "bestever": 39863056,
+      "authorised": 1763325305,
+      "blocks": 0,
+      "worker": [
+        {
+          "workername": "BC1Q...gamma1pleb",
+          "hashrate1m": "1.94T",
+          "hashrate1hr": "1.8T",
+          "shares": 11426089,
+          "bestshare": 39863056.04777412,
+          "bestever": 39863056,
+          "lastshare": 1763352196
+        },
+        {
+          "workername": "BC1Q...bitaxe_solo_1",
+          "hashrate1m": "2.24T",
+          "hashrate1hr": "1.81T",
+          "shares": 10421000,
+          "bestshare": 6019592.082369524,
+          "bestever": 6019592,
+          "lastshare": 1763352181
+        }
+      ]
+    };
+
+    el("refreshBtn").addEventListener("click", loadApi);
+    el("toggleManualBtn").addEventListener("click", () => {
+      el("manualBox").classList.toggle("hidden");
+    });
+    el("sampleBtn").addEventListener("click", () => {
+      el("manualJson").value = JSON.stringify(sampleData, null, 2);
+    });
+    el("applyManualBtn").addEventListener("click", () => {
+      try {
+        const value = el("manualJson").value.trim();
+        if (!value) throw new Error("JSON이 비어 있습니다.");
+        const data = JSON.parse(value);
+        render(data, "수동 JSON");
+      } catch (err) {
+        setStatus(`수동 JSON 파싱 실패: ${err.message}`, "err");
+      }
+    });
+
+    loadApi();
+  </script>
+</body>
+</html>
